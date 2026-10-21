@@ -90,6 +90,9 @@ function renderStats(stats) {
     setText("statSensors", stats.sensors);
     setText("statEquipments", stats.equipments);
     setText("statUsers", stats.users);
+    setText("statDevices", `${stats.devices_online} / ${stats.devices}`);
+    setText("statDevicesDetail", `${stats.devices_online} en ligne · ${stats.devices_offline} hors ligne`);
+    setText("statSites", stats.sites);
 }
 
 function renderChart() {

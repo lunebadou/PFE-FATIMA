@@ -216,6 +216,8 @@ def status(_user=Depends(current_user)):
 def admin_dashboard(_admin=Depends(require_admin)):
     with get_db() as db:
         count = lambda sql: db.execute(sql).fetchone()[0]  # noqa: E731
+        devices = [r[0] for r in db.execute("SELECT last_seen FROM devices")]
+        online = sum(is_online(d) for d in devices)
         return {
             "success": True,
             "active_alerts": count("SELECT COUNT(*) FROM alerts WHERE status = 'active'"),
@@ -223,7 +225,9 @@ def admin_dashboard(_admin=Depends(require_admin)):
             "equipments": count("SELECT COUNT(*) FROM equipments"),
             "users": count("SELECT COUNT(*) FROM users WHERE status = 'active'"),
             "sites": count("SELECT COUNT(*) FROM sites"),
-            "devices": count("SELECT COUNT(*) FROM devices"),
+            "devices": len(devices),
+            "devices_online": online,
+            "devices_offline": len(devices) - online,
             "measurements": count("SELECT COUNT(*) FROM sensor_data"),
         }
 

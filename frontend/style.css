@@ -573,6 +573,10 @@ select {
     margin-bottom: 25px;
 }
 
+.stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+}
+
 .status-grid {
     gap: 15px;
 }
