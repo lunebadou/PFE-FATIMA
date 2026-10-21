@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#111827">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="icons/logo.jpg">
+    <link rel="stylesheet" href="style.css">
+    <title>Timdeiz Incendie - Espace Client</title>
+</head>
+<body>
+
+<div class="admin-layout">
+
+    <aside id="sidebar" class="sidebar">
+        <div class="brand">
+            <div class="brand-icon"><img src="icons/logo.jpg" alt="Logo Timdeiz Incendie"></div>
+            <div>
+                <h2>TIMDEIZ</h2>
+                <span>Incendie</span>
+            </div>
+        </div>
+
+        <nav class="nav-menu">
+            <button class="nav-item active" data-page="dashboard">📊 Suivi en direct</button>
+            <button class="nav-item" data-page="alerts">🚨 Mes alertes <span id="navAlertCount" class="nav-count"></span></button>
+            <button class="nav-item" data-page="measurements">📈 Historique</button>
+            <button class="nav-item" data-page="profile">👤 Mon profil</button>
+            <button class="nav-item" data-page="settings">⚙️ Paramètres</button>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="connection"><span id="connectionDot" class="connection-dot"></span><span id="connectionText">Connexion...</span></div>
+            <button id="logoutButton" class="logout-btn">🚪 Déconnexion</button>
+        </div>
+    </aside>
+    <div id="sidebarBackdrop" class="sidebar-backdrop"></div>
+
+    <main class="main-content">
+
+        <header class="topbar">
+            <div class="topbar-left">
+                <button id="menuButton" class="refresh-btn menu-btn" aria-label="Menu">☰</button>
+                <h1 id="pageTitle">Suivi en direct</h1>
+            </div>
+            <div class="topbar-right">
+                <button id="refreshButton" class="refresh-btn">🔄 <span class="refresh-label">Actualiser</span></button>
+                <span class="admin-badge client-badge" id="userName">Client</span>
+            </div>
+        </header>
+
+        <!-- SUIVI EN DIRECT (capture 5.11 du mémoire) -->
+        <section id="page-dashboard" class="page active">
+            <div class="page-header">
+                <div>
+                    <h2>TIMDEIZ INCENDIE - Suivi Client</h2>
+                    <p>Données mises à jour en temps réel</p>
+                </div>
+                <span class="last-update">Dernière mesure : <span id="lastUpdate">--</span></span>
+            </div>
+
+            <div id="noSite" class="table-card" hidden>
+                <p class="muted" style="margin:0">
+                    Aucun site n'est encore rattaché à votre compte. Demandez à l'administrateur
+                    de vous associer à votre site pour voir vos mesures.
+                </p>
+            </div>
+
+            <div class="client-grid">
+                <div class="client-card">
+                    <h3>Température</h3>
+                    <div id="client-temp" class="value">-- °C</div>
+                </div>
+                <div class="client-card">
+                    <h3>Humidité</h3>
+                    <div id="client-humidity" class="value">-- %</div>
+                </div>
+                <div class="client-card">
+                    <h3>Niveau de Gaz</h3>
+                    <div id="client-gas" class="value">-- ppm</div>
+                </div>
+                <div class="client-card">
+                    <h3>Alerte Flamme</h3>
+                    <div id="flame-alert-badge" class="badge badge-success">SÉCURISÉ</div>
+                </div>
+                <div class="client-card">
+                    <h3>Alerte Fuite de Gaz</h3>
+                    <div id="gas-alert-badge" class="badge badge-success">SÉCURISÉ</div>
+                </div>
+            </div>
+
+            <div class="table-card">
+                <div class="chart-head">
+                    <h3>📉 Évolution des mesures</h3>
+                    <div class="chart-tabs">
+                        <button class="chart-tab active" data-metric="temperature">Température</button>
+                        <button class="chart-tab" data-metric="humidity">Humidité</button>
+                        <button class="chart-tab" data-metric="gas">Gaz</button>
+                    </div>
+                </div>
+                <div id="chart" class="chart"></div>
+            </div>
+
+            <div class="table-card">
+                <h3>📍 Mon site</h3>
+                <div id="mySites"><p class="muted">Chargement...</p></div>
+            </div>
+        </section>
+
+        <!-- ALERTES -->
+        <section id="page-alerts" class="page">
+            <div class="page-header">
+                <div>
+                    <h2>Mes alertes</h2>
+                    <p>Événements détectés sur votre site</p>
+                </div>
+            </div>
+            <div class="table-card">
+                <div id="alertsList"><p class="muted">Chargement...</p></div>
+            </div>
+        </section>
+
+        <!-- HISTORIQUE -->
+        <section id="page-measurements" class="page">
+            <div class="page-header">
+                <div>
+                    <h2>Historique</h2>
+                    <p>Les 200 dernières mesures de votre site</p>
+                </div>
+            </div>
+            <div class="table-card">
+                <div id="historyTable"><p class="muted">Chargement...</p></div>
+            </div>
+        </section>
+
+        <!-- PROFIL -->
+        <section id="page-profile" class="page">
+            <div class="page-header">
+                <div>
+                    <h2>👤 Mon profil</h2>
+                    <p>Informations de votre compte</p>
+                </div>
+            </div>
+            <div class="profile-card">
+                <div class="profile-header">
+                    <div id="profileAvatar" class="profile-avatar">👤</div>
+                    <div>
+                        <h3 id="profileName">--</h3>
+                        <p id="profileEmail">--</p>
+                    </div>
+                </div>
+                <div class="profile-info">
+                    <div class="profile-field"><span class="profile-field-label">Nom</span><div id="profileNameValue" class="profile-field-value">--</div></div>
+                    <div class="profile-field"><span class="profile-field-label">Adresse email</span><div id="profileEmailValue" class="profile-field-value">--</div></div>
+                    <div class="profile-field"><span class="profile-field-label">Téléphone</span><div id="profilePhoneValue" class="profile-field-value">--</div></div>
+                    <div class="profile-field"><span class="profile-field-label">Rôle</span><div class="profile-field-value"><span class="badge badge-neutral">Client</span></div></div>
+                </div>
+                <div class="profile-actions">
+                    <button id="editProfileButton" class="btn btn-primary" type="button">Modifier le profil</button>
+                    <button id="changePasswordButton" class="btn" type="button">Modifier le mot de passe</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- PARAMÈTRES -->
+        <section id="page-settings" class="page">
+            <div class="page-header">
+                <div>
+                    <h2>⚙️ Paramètres</h2>
+                    <p>Préférences d'affichage</p>
+                </div>
+            </div>
+            <div class="settings-card">
+                <div class="setting-item">
+                    <div>
+                        <div class="setting-title">🔔 Notifications</div>
+                        <div class="setting-description">Afficher une notification et jouer un son à chaque nouvelle alerte.</div>
+                    </div>
+                    <label class="setting-toggle"><input type="checkbox" id="notificationsSetting" checked><span class="toggle-slider"></span></label>
+                </div>
+                <div class="setting-item">
+                    <div>
+                        <div class="setting-title">🔄 Actualisation automatique</div>
+                        <div class="setting-description">Mettre à jour les mesures automatiquement.</div>
+                    </div>
+                    <label class="setting-toggle"><input type="checkbox" id="autoRefreshSetting" checked><span class="toggle-slider"></span></label>
+                </div>
+                <div class="setting-item">
+                    <div>
+                        <div class="setting-title">⏱️ Intervalle d'actualisation</div>
+                        <div class="setting-description">Fréquence de mise à jour des données.</div>
+                    </div>
+                    <select id="refreshIntervalSetting" class="setting-select">
+                        <option value="1000">1 seconde</option>
+                        <option value="2000">2 secondes</option>
+                        <option value="5000">5 secondes</option>
+                        <option value="10000">10 secondes</option>
+                    </select>
+                </div>
+                <div class="setting-item">
+                    <div>
+                        <div class="setting-title">🌙 Mode sombre</div>
+                        <div class="setting-description">Utiliser l'apparence sombre de l'application.</div>
+                    </div>
+                    <label class="setting-toggle"><input type="checkbox" id="darkModeSetting" checked><span class="toggle-slider"></span></label>
+                </div>
+            </div>
+        </section>
+
+    </main>
+</div>
+
+<div id="profileModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
+    <form id="profileForm" class="modal-content">
+        <h3 id="profileModalTitle">Modifier le profil</h3>
+        <div class="field"><label for="profileNameInput">Nom</label><input id="profileNameInput" autocomplete="name" required maxlength="100"></div>
+        <div class="field"><label for="profileEmailInput">Adresse e-mail</label><input id="profileEmailInput" type="email" autocomplete="email" required maxlength="150"></div>
+        <div class="field"><label for="profilePhoneInput">Téléphone</label><input id="profilePhoneInput" type="tel" autocomplete="tel" maxlength="30"></div>
+        <p id="profileError" class="form-error"></p>
+        <div class="modal-actions">
+            <button type="button" class="btn" data-close>Annuler</button>
+            <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+        </div>
+    </form>
+</div>
+
+<div id="passwordModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="passwordModalTitle">
+    <form id="passwordForm" class="modal-content">
+        <h3 id="passwordModalTitle">Modifier le mot de passe</h3>
+        <div class="field"><label for="currentPassword">Mot de passe actuel</label><input id="currentPassword" type="password" autocomplete="current-password" required></div>
+        <div class="field"><label for="newPassword">Nouveau mot de passe</label><input id="newPassword" type="password" autocomplete="new-password" minlength="6" required></div>
+        <div class="field"><label for="confirmPassword">Confirmer le nouveau mot de passe</label><input id="confirmPassword" type="password" autocomplete="new-password" minlength="6" required></div>
+        <p id="passwordError" class="form-error"></p>
+        <div class="modal-actions">
+            <button type="button" class="btn" data-close>Annuler</button>
+            <button type="submit" class="btn btn-primary">Modifier</button>
+        </div>
+    </form>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="app.js"></script>
+<script src="account.js"></script>
+<script src="client.js"></script>
+</body>
+</html>

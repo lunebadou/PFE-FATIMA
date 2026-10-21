@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0b0f14">
+    <meta name="description" content="Timdeiz Incendie - Plateforme IoT de détection et supervision incendie">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="icons/logo.jpg">
+    <link rel="apple-touch-icon" href="icons/logo.jpg">
+    <link rel="stylesheet" href="style.css">
+    <title>Timdeiz Incendie — Connexion</title>
+</head>
+
+<body class="auth-page">
+
+<main class="auth-container">
+
+    <div class="auth-brand">
+        <div class="auth-logo">
+            <img src="icons/logo.jpg" alt="Logo Timdeiz Incendie">
+        </div>
+    </div>
+
+    <div class="auth-card">
+
+        <!-- PREMIER LANCEMENT : création du compte administrateur -->
+        <section id="setupSection" hidden>
+            <div class="auth-header">
+                <h2>Bienvenue 👋</h2>
+                <p>Premier lancement : créez le compte administrateur de la plateforme.</p>
+            </div>
+
+            <form id="setupForm">
+                <div class="form-group">
+                    <label for="setupName">Nom complet</label>
+                    <input type="text" id="setupName" placeholder="Votre nom complet" autocomplete="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="setupEmail">Adresse email</label>
+                    <input type="email" id="setupEmail" placeholder="exemple@email.com" autocomplete="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="setupPhone">Téléphone (facultatif)</label>
+                    <input type="tel" id="setupPhone" placeholder="77 000 00 00" autocomplete="tel">
+                </div>
+                <div class="form-group">
+                    <label for="setupPassword">Mot de passe</label>
+                    <input type="password" id="setupPassword" placeholder="Minimum 6 caractères" autocomplete="new-password" minlength="6" required>
+                </div>
+                <div class="form-group">
+                    <label for="setupPasswordConfirm">Confirmer le mot de passe</label>
+                    <input type="password" id="setupPasswordConfirm" placeholder="Répétez votre mot de passe" autocomplete="new-password" minlength="6" required>
+                </div>
+                <button type="submit" id="setupButton" class="auth-button">Créer le compte administrateur</button>
+            </form>
+        </section>
+
+        <!-- CONNEXION -->
+        <section id="loginSection">
+            <div class="auth-header">
+                <h2>Connexion</h2>
+                <p>Accédez à votre espace de supervision.</p>
+            </div>
+
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Adresse email</label>
+                    <input type="email" id="loginEmail" placeholder="exemple@email.com" autocomplete="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="loginPassword">Mot de passe</label>
+                    <input type="password" id="loginPassword" placeholder="Votre mot de passe" autocomplete="current-password" required>
+                </div>
+
+                <div class="auth-options">
+                    <label>
+                        <input type="checkbox" id="rememberMe" checked>
+                        <span>Se souvenir de moi</span>
+                    </label>
+                    <button type="button" class="auth-link auth-forgot" id="forgotButton">Mot de passe oublié ?</button>
+                </div>
+
+                <button type="submit" id="loginButton" class="auth-button">Se connecter</button>
+            </form>
+
+            <div class="auth-switch">
+                <span>Vous n'avez pas encore de compte ?</span>
+                <button type="button" id="showRegister" class="auth-link">Créer un compte</button>
+            </div>
+        </section>
+
+        <!-- INSCRIPTION -->
+        <section id="registerSection" hidden>
+            <div class="auth-header">
+                <h2>Créer un compte</h2>
+                <p>Inscrivez-vous pour accéder à votre espace Timdeiz Incendie.</p>
+            </div>
+
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="registerName">Nom complet</label>
+                    <input type="text" id="registerName" placeholder="Votre nom complet" autocomplete="name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="registerEmail">Adresse email</label>
+                    <input type="email" id="registerEmail" placeholder="exemple@email.com" autocomplete="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="registerPhone">Téléphone (pour les alertes SMS)</label>
+                    <input type="tel" id="registerPhone" placeholder="77 000 00 00" autocomplete="tel">
+                </div>
+
+                <div class="form-group">
+                    <label for="registerPassword">Mot de passe</label>
+                    <input type="password" id="registerPassword" placeholder="Minimum 6 caractères" autocomplete="new-password" minlength="6" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="registerPasswordConfirm">Confirmer le mot de passe</label>
+                    <input type="password" id="registerPasswordConfirm" placeholder="Répétez votre mot de passe" autocomplete="new-password" minlength="6" required>
+                </div>
+
+                <button type="submit" id="registerButton" class="auth-button">S'inscrire</button>
+            </form>
+
+            <div class="auth-switch">
+                <span>Vous avez déjà un compte ?</span>
+                <button type="button" id="showLogin" class="auth-link">Se connecter</button>
+            </div>
+        </section>
+
+    </div>
+
+    <div class="auth-footer">
+        <span>🔒 Connexion sécurisée</span>
+        <span>•</span>
+        <span>Timdeiz Incendie</span>
+    </div>
+
+</main>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="app.js"></script>
+<script>
+    // Déjà connecté : on va directement au bon tableau de bord
+    if (getToken() && getUser()) {
+        window.location.replace(homeFor(getUser()));
+    }
+
+    function switchTo(register) {
+        $("setupSection").hidden = true;
+        $("loginSection").hidden = register;
+        $("registerSection").hidden = !register;
+    }
+
+    // Premier lancement : aucun administrateur n'existe encore
+    api("/api/setup").then(data => {
+        if (!data.needs_setup) return;
+        $("loginSection").hidden = true;
+        $("registerSection").hidden = true;
+        $("setupSection").hidden = false;
+    }).catch(error => showToast(error.message, true));
+
+    $("setupForm").addEventListener("submit", async event => {
+        event.preventDefault();
+        if ($("setupPassword").value !== $("setupPasswordConfirm").value) {
+            showToast("Les deux mots de passe ne correspondent pas.", true);
+            return;
+        }
+        $("setupButton").disabled = true;
+        try {
+            const data = await api("/api/setup", {
+                method: "POST",
+                body: {
+                    name: $("setupName").value,
+                    email: $("setupEmail").value,
+                    phone: $("setupPhone").value || null,
+                    password: $("setupPassword").value,
+                },
+            });
+            saveSession(data.token, data.user, true);
+            window.location.replace("admin.html");
+        } catch (error) {
+            showToast(error.message, true);
+            $("setupButton").disabled = false;
+        }
+    });
+
+    $("showRegister").addEventListener("click", () => switchTo(true));
+    $("showLogin").addEventListener("click", () => switchTo(false));
+    $("forgotButton").addEventListener("click", () =>
+        showToast("Contactez votre administrateur pour réinitialiser votre mot de passe."));
+
+    $("loginForm").addEventListener("submit", async event => {
+        event.preventDefault();
+        const button = $("loginButton");
+        button.disabled = true;
+        button.textContent = "Connexion...";
+        try {
+            const data = await api("/api/login", {
+                method: "POST",
+                body: { email: $("loginEmail").value, password: $("loginPassword").value },
+            });
+            saveSession(data.token, data.user, $("rememberMe").checked);
+            showToast(`Bienvenue ${data.user.name} !`);
+            window.location.replace(homeFor(data.user));
+        } catch (error) {
+            showToast(error.message, true);
+            button.disabled = false;
+            button.textContent = "Se connecter";
+        }
+    });
+
+    $("registerForm").addEventListener("submit", async event => {
+        event.preventDefault();
+        if ($("registerPassword").value !== $("registerPasswordConfirm").value) {
+            showToast("Les deux mots de passe ne correspondent pas.", true);
+            return;
+        }
+        const button = $("registerButton");
+        button.disabled = true;
+        try {
+            const data = await api("/api/register", {
+                method: "POST",
+                body: {
+                    name: $("registerName").value,
+                    email: $("registerEmail").value,
+                    phone: $("registerPhone").value || null,
+                    password: $("registerPassword").value,
+                },
+            });
+            showToast(data.message);
+            $("loginEmail").value = $("registerEmail").value;
+            $("registerForm").reset();
+            switchTo(false);
+        } catch (error) {
+            showToast(error.message, true);
+        } finally {
+            button.disabled = false;
+        }
+    });
+</script>
+
+</body>
+</html>
