@@ -126,8 +126,12 @@ ce script copie ses comptes (mêmes mots de passe), sites, mesures et alertes :
 
 ```bash
 .venv\Scripts\pip install mysql-connector-python
-.venv\Scripts\python importer_mysql.py --port 3306 --user root --password ""
+.venv\Scripts\python importer_mysql.py --env "C:\chemin\vers\Backend_nodeRed\config\.env"
 ```
+
+`--env` pointe vers le fichier `.env` de l'ancienne application : le script y lit l'adresse,
+l'utilisateur et le mot de passe MySQL (il n'y a rien à retaper). On peut aussi les donner un par un
+avec `--host`, `--port`, `--user`, `--password`, `--database`.
 
 Attention : il remplace le contenu de la nouvelle base.
 

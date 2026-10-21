@@ -1,19 +1,24 @@
-"""Importe les données de l'ancienne application (base MySQL « incendie_db »).
+r"""Importe les données de l'ancienne application (base MySQL « incendie_db »).
 
 Copie dans incendie.db : les comptes (mêmes emails, mêmes mots de passe),
 les sites, les appareils, toutes les mesures et toutes les alertes.
 Attention : le contenu actuel de incendie.db est remplacé.
 
-À lancer sur le PC où se trouve l'ancienne base (XAMPP / MySQL démarré) :
-    pip install mysql-connector-python
-    python importer_mysql.py
+Le plus simple : double-cliquer sur importer.bat (Windows).
+Le script cherche tout seul le fichier de configuration de l'ancienne application
+(Backend_nodeRed\config\.env) sur le Bureau, dans Documents, Téléchargements et OneDrive,
+et y lit l'adresse, l'utilisateur et le mot de passe MySQL. S'il ne le trouve pas,
+il demande le mot de passe MySQL.
 
-Paramètres de connexion (facultatifs, sinon valeurs par défaut de XAMPP) :
-    python importer_mysql.py --host 127.0.0.1 --port 3306 --user root --password "" --database incendie_db
+Options si besoin :
+    python importer_mysql.py --env "C:\chemin\vers\Backend_nodeRed\config\.env"
+    python importer_mysql.py --host 127.0.0.1 --port 3306 --user root --password "..." --database incendie_db
 """
 
 import argparse
+import getpass
 import sys
+from pathlib import Path
 
 from database import get_db
 from models import init_db
@@ -39,14 +44,56 @@ def text(value):
     return value.isoformat(timespec="seconds") if hasattr(value, "isoformat") else str(value)
 
 
+def find_old_config():
+    """Cherche Backend_nodeRed/config/.env de l'ancienne application dans les dossiers habituels."""
+    home = Path.home()
+    roots = [Path(__file__).resolve().parent.parent]
+    for name in ("Desktop", "Bureau", "Documents", "Downloads", "Téléchargements", "OneDrive"):
+        roots += [home / name, home / "OneDrive" / name]
+    found = []
+    for root in roots:
+        if not root.is_dir():
+            continue
+        for depth in ("", "*/", "*/*/", "*/*/*/"):
+            try:
+                found += [p for p in root.glob(f"{depth}Backend_nodeRed/config/.env") if ".venv" not in p.parts]
+            except OSError:
+                pass
+    # Le plus récemment modifié en premier
+    found = sorted(set(found), key=lambda p: p.stat().st_mtime, reverse=True)
+    return found[0] if found else None
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--host", default="127.0.0.1")
-    parser.add_argument("--port", type=int, default=3306)
-    parser.add_argument("--user", default="root")
-    parser.add_argument("--password", default="")
-    parser.add_argument("--database", default="incendie_db")
+    parser.add_argument("--env", help="fichier .env de l'ancienne application (DB_HOST, DB_PASSWORD...)")
+    parser.add_argument("--host")
+    parser.add_argument("--port", type=int)
+    parser.add_argument("--user")
+    parser.add_argument("--password")
+    parser.add_argument("--database")
     args = parser.parse_args()
+
+    from dotenv import dotenv_values
+
+    old = {}
+    if args.env:
+        old = dotenv_values(args.env)
+        if not old:
+            sys.exit(f"Fichier introuvable ou vide : {args.env}")
+    elif not args.password:
+        config = find_old_config()
+        if config:
+            print(f"Configuration de l'ancienne application trouvée : {config}")
+            old = dotenv_values(config)
+        else:
+            print("Configuration de l'ancienne application introuvable.")
+            args.password = getpass.getpass("Mot de passe MySQL (utilisateur root) : ")
+    args.host = args.host or old.get("DB_HOST") or "127.0.0.1"
+    args.port = args.port or int(old.get("DB_PORT") or 3306)
+    args.user = args.user or old.get("DB_USER") or "root"
+    args.password = args.password if args.password is not None else (old.get("DB_PASSWORD") or "")
+    args.database = args.database or old.get("DB_NAME") or "incendie_db"
 
     try:
         import mysql.connector
